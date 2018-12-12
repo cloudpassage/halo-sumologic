@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Send Halo events and statistics to SumoLogic
+Globals:
+  Function:
+    Environment:
+      Variables:
+        HALO_API_HOSTNAME: api.cloudpassage.com
+        TIME_RANGE: "60"
+        HALO_API_KEY: NONE
+        HALO_API_SECRET_KEY: NONE
+Parameters:
+  EventsCodeUriParameter:
+    Type: String
+    Default: "halo_events_to_sumologic/"
+  MetricsCodeUriParameter:
+    Type: String
+    Default: "halo_metrics_to_sumologic/"
+Resources:
+  HaloMetricsToSumologic:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: HaloMetricsToSumologic
+      CodeUri:
+        Ref: MetricsCodeUriParameter
+      Handler: halo_metrics_to_sumologic.lambda_handler
+      Runtime: python2.7
+      Timeout: 240
+  HaloEventsToSumologic:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: HaloEventsToSumologic
+      CodeUri:
+        Ref: EventsCodeUriParameter
+      Handler: halo_events_to_sumologic.lambda_handler
+      Runtime: python2.7
+      Timeout: 240
