@@ -4,7 +4,7 @@ import sys
 
 def sumologic_https_forwarder(url, data, max_retry=3):
     reply = requests.post(url, data=data)
-    print (">> Reply Status Code = %s" % reply.status_code)
+    # print (">> Reply Status Code = %s" % reply.status_code)
     reply_status_code = reply.status_code
     num_attempts = 1
     while (reply_status_code != 200) and (num_attempts < max_retry):
