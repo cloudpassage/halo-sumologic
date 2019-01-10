@@ -12,6 +12,7 @@ AWS_REGION = 'us-west-2'
 HALO_CONCURRENCY = 10
 MAX_PAGES = 50
 SUMO_MAX_RETRY = 3
+EXPORT_BATCH_SIZE = 10
 
 
 def get_timestamp():
@@ -22,6 +23,7 @@ def get_timestamp():
 
 
 def set_timestamp(timestamp):
+    """Delete and re-create SSM parameter."""
     ssm_client = boto3.client('ssm', region_name=AWS_REGION)
     try:
         # We do this so that we won't exceed the max number of param versions
@@ -36,6 +38,25 @@ def set_timestamp(timestamp):
     msg = 'Updated timestamp parameter named {} with {} (version {})'
     print(msg.format(TIMESTAMP_SSM_PARAM_NAME, timestamp, response['Version']))
     return
+
+
+def increment_timestamp(timestamp):
+    """Only update SSM parameter ()faster than delete/re-create."""
+    ssm_client = boto3.client('ssm', region_name=AWS_REGION)
+    response = ssm_client.put_parameter(Name=TIMESTAMP_SSM_PARAM_NAME,
+                                        Description=SSM_PARAM_DESCRIPTION,
+                                        Value=timestamp, Type='String',
+                                        Overwrite=True)
+    msg = 'Updated timestamp parameter named {} with {} (version {})'
+    print(msg.format(TIMESTAMP_SSM_PARAM_NAME, timestamp, response['Version']))
+    return
+
+
+def generate_payload(event_list):
+    """Generates and sanitizes payload for Sumo."""
+    payload = "\n".join([json.dumps(x, ensure_ascii=False).replace('\n', ' ')
+                        for x in event_list])
+    return payload
 
 
 def lambda_handler(event, context):
@@ -69,10 +90,23 @@ def lambda_handler(event, context):
     print('Number of events: %d' % len(list_of_events))
     if len(list_of_events) > 0:
         last_event_created_at = list_of_events[-1]['created_at']
-        for each in list_of_events:
-            sumologic_https_forwarder(url=sumo_url,
-                                      data=json.dumps(each,
-                                                      ensure_ascii=False),
+        export_counter = 0
+        event_accumulator = []
+        for event in list_of_events:
+            export_counter += 1
+            event_accumulator.append(event)
+            # When we reach batch size, we dump to Sumo, update timestamp,
+            # and empty the event accumulator
+            if export_counter % EXPORT_BATCH_SIZE == 0:
+                payload = generate_payload(event_accumulator)
+                sumologic_https_forwarder(url=sumo_url, data=payload,
+                                          max_retry=max_retry)
+                event_accumulator = []
+                increment_timestamp(event["created_at"])
+        # Finally, flush the last partial batch
+        payload = generate_payload(event_accumulator)
+        if payload != "":
+            sumologic_https_forwarder(url=sumo_url, data=payload,
                                       max_retry=max_retry)
         msg = "Events between {} and {} shipped to Sumologic"
         print(msg.format(list_of_events[0]["created_at"],
