@@ -14,7 +14,7 @@ def lambda_handler(event, context):
     halo_api_secret = os.environ['halo_api_secret_key']
     integration = get_integration_string()
     print ('Sumo_URL - %s' % sumo_url)
-    session = cloudpassage.HaloSession(halo_api_key_id, halo_api_secret, integration_string = integration)
+    session = cloudpassage.HaloSession(halo_api_key_id, halo_api_secret, integration_string=integration)
     httphelper = cloudpassage.HttpHelper(session)
     server_groups = cloudpassage.ServerGroup(session)
     root_server_group_id = list({x["id"] for x in server_groups.list_all()
@@ -141,11 +141,11 @@ def lambda_handler(event, context):
     print ("[halo_metrics_to_sumologic.lambda_handler][INFO] End.")
     return current_time
 
-def get_integration_string(self):
+def get_integration_string():
     """Return integration string for this tool."""
-    return "Halo-metrics-to-sumologic/%s" % self.get_tool_version()
+    return "Halo-metrics-to-sumologic/%s" % get_tool_version()
 
-def get_tool_version(self):
+def get_tool_version():
     """Get version of this tool from the __init__.py file."""
     here_path = os.path.abspath(os.path.dirname(__file__))
     init_file = os.path.join(here_path, "__init__.py")
