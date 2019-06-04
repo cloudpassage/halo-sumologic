@@ -18,17 +18,17 @@ RUN apt-get update && \
     python-pip \
     zip
 
-RUN pip install aws-sam-cli
+RUN pip install aws-sam-cli pycodestyle
 
-# Run sam build to download all deps
+# Copy in all source files
 WORKDIR ${SOURCE_DIR}
 COPY src/ ${SOURCE_DIR}
 
-# Build events shipper
-WORKDIR ${SOURCE_DIR}
-RUN sam build --debug --region=us-west-2 -b ${BUILD_DIR}
+# Run pycodestyle on all source files
+RUN pycodestyle halo_events_to_sumologic/*py
+RUN pycodestyle halo_metrics_to_sumologic/*py
 
-# Build metrics shipper
+# Build shippers
 WORKDIR ${SOURCE_DIR}
 RUN sam build --debug --region=us-west-2 -b ${BUILD_DIR}
 
