@@ -1,5 +1,7 @@
 import cloudpassage
 import operator
+import os
+import re
 from multiprocessing.dummy import Pool as ThreadPool
 try:
     from urllib import urlencode
@@ -11,7 +13,8 @@ class HaloEvents(object):
     """Initialize with Halo key and secret."""
     def __init__(self, key, secret, concurrency):
         self.concurrency = concurrency
-        session = cloudpassage.HaloSession(key, secret)
+        self.integration = self.get_integration_string()
+        session = cloudpassage.HaloSession(key, secret, integration_string=self.integration)
         session.authenticate_client()
         self.helper = cloudpassage.HttpHelper(session)
         return
@@ -70,3 +73,17 @@ class HaloEvents(object):
         except cloudpassage.CloudPassageResourceExistence:
             retval = []
         return retval
+
+    def get_integration_string(self):
+        """Return integration string for this tool."""
+        return "Halo-events-to-sumologic/%s" % self.get_tool_version()
+
+    def get_tool_version(self):
+        """Get version of this tool from the __init__.py file."""
+        here_path = os.path.abspath(os.path.dirname(__file__))
+        init_file = os.path.join(here_path, "__init__.py")
+        ver = 0
+        with open(init_file, 'r') as i_f:
+            rx_compiled = re.compile(r"\s*__version__\s*=\s*\"(\S+)\"")
+            ver = rx_compiled.search(i_f.read()).group(1)
+        return ver

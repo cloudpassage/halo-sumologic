@@ -2,6 +2,7 @@ import cloudpassage
 import datetime
 import json
 import os
+import re
 from sumologic_https import sumologic_https_forwarder
 
 
@@ -11,8 +12,9 @@ def lambda_handler(event, context):
     sumo_url = os.environ['sumologic_https_url']
     halo_api_key_id = os.environ['halo_api_key_id']
     halo_api_secret = os.environ['halo_api_secret_key']
+    integration = get_integration_string()
     print ('Sumo_URL - %s' % sumo_url)
-    session = cloudpassage.HaloSession(halo_api_key_id, halo_api_secret)
+    session = cloudpassage.HaloSession(halo_api_key_id, halo_api_secret, integration_string=integration)
     httphelper = cloudpassage.HttpHelper(session)
     server_groups = cloudpassage.ServerGroup(session)
     root_server_group_id = list({x["id"] for x in server_groups.list_all()
@@ -138,6 +140,20 @@ def lambda_handler(event, context):
                               max_retry=max_retry)
     print ("[halo_metrics_to_sumologic.lambda_handler][INFO] End.")
     return current_time
+
+def get_integration_string():
+    """Return integration string for this tool."""
+    return "Halo-metrics-to-sumologic/%s" % get_tool_version()
+
+def get_tool_version():
+    """Get version of this tool from the __init__.py file."""
+    here_path = os.path.abspath(os.path.dirname(__file__))
+    init_file = os.path.join(here_path, "__init__.py")
+    ver = 0
+    with open(init_file, 'r') as i_f:
+        rx_compiled = re.compile(r"\s*__version__\s*=\s*\"(\S+)\"")
+        ver = rx_compiled.search(i_f.read()).group(1)
+    return ver
 
 
 def main():
