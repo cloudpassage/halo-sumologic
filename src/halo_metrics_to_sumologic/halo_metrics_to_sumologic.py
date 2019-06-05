@@ -3,7 +3,7 @@ import datetime
 import json
 import os
 import re
-from sumologic_https import sumologic_https_forwarder
+from .sumologic_https import sumologic_https_forwarder
 
 
 def lambda_handler(event, context):
