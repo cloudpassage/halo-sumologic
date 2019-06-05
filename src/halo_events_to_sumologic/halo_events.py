@@ -14,7 +14,8 @@ class HaloEvents(object):
     def __init__(self, key, secret, concurrency):
         self.concurrency = concurrency
         self.integration = self.get_integration_string()
-        session = cloudpassage.HaloSession(key, secret, integration_string=self.integration)
+        session = cloudpassage.HaloSession(key, secret,
+                                           integration_string=self.integration)
         session.authenticate_client()
         self.helper = cloudpassage.HttpHelper(session)
         return
