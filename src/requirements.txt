@@ -1,1 +1,1 @@
-cloudpassage==1.2.2
+cloudpassage==1.6.0
