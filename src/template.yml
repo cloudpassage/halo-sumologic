@@ -24,7 +24,7 @@ Resources:
       CodeUri:
         Ref: MetricsCodeUriParameter
       Handler: halo_metrics_to_sumologic.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.6
       Timeout: 240
   HaloEventsToSumologic:
     Type: AWS::Serverless::Function
@@ -33,5 +33,5 @@ Resources:
       CodeUri:
         Ref: EventsCodeUriParameter
       Handler: halo_events_to_sumologic.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.6
       Timeout: 240
