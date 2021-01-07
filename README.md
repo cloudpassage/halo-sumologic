@@ -9,3 +9,8 @@ Installation instructions: https://help.sumologic.com/07Sumo-Logic-Apps/22Securi
 * Clone this repo locally and descend into the root directory of the repo.
 * Build the container image: `docker build -t halo-sumologic:latest .`
 * Export the lambda archives: `docker run -it --rm -v /tmp/halo-sumologic:/var/export halo-sumologic:latest cp -r /var/output/ /var/export/`
+
+<!---
+#CPTAGS:community-supported integration
+#TBICON:images/python_icon.png
+-->
