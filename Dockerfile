@@ -8,17 +8,23 @@ ENV EVENTS_CODE_DIR="halo_events_to_sumologic"
 ENV EVENTS_FN_NAME="HaloEventsToSumologic"
 ENV METRICS_CODE_DIR="halo_metrics_to_sumologic"
 
+ENV LC_ALL="C.UTF-8"
+ENV LANG="C.UTF-8"
+
+RUN export LC_ALL=C.UTF-8
+RUN export LANG=C.UTF-8
+
 RUN mkdir -p ${OUTPUT_DIR}
 RUN mkdir -p ${BUILD_DIR}
 RUN mkdir -p ${SOURCE_DIR}
 
 RUN apt-get update && \
     apt-get install -y \
-    python \
-    python-pip \
+    python3 \
+    python3-pip \
     zip
 
-RUN pip install aws-sam-cli
+RUN pip3 install aws-sam-cli
 
 # Run sam build to download all deps
 WORKDIR ${SOURCE_DIR}
